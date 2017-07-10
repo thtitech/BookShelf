@@ -11,9 +11,44 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
     }
+
+    def validConfig
+    def keystoreFile
+    def keystorePassword
+    def keystoreAlias
+
+    try {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        keystoreFile = properties.getProperty('keystore.file')
+        keystorePassword = properties.getProperty('keystore.password')
+        keystoreAlias = properties.getProperty('keystore.alias')
+        validConfig = keystoreFile != null && keystorePassword != null && keystoreAlias != null;
+    } catch (error) {
+        validConfig = false;
+    }
+
+    if (validConfig) {
+        System.out.println("Release signing configured with " + keystoreFile)
+        signingConfigs {
+            release {
+                storeFile project.rootProject.file(keystoreFile)
+                storePassword keystorePassword
+                keyAlias keystoreAlias
+                keyPassword keystorePassword
+            }
+        }
+    } else {
+        System.out.println("Specify keystore.file, keystore.alias and keystore.password in local.properties to enable release signing.")
+    }
+
     buildTypes {
         release {
+            if (validConfig) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -33,11 +68,12 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    compile 'com.android.support:multidex:1.0.0'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:support-vector-drawable:25.3.1'
 
-    compile 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
+    compile 'com.journeyapps:zxing-android-embedded:3.5.0@aar'
     compile 'com.journeyapps:zxing-android-legacy:2.3.0@aar'
     compile 'com.journeyapps:zxing-android-integration:2.3.0@aar'
     compile 'com.google.zxing:core:3.2.1'
