@@ -34,7 +34,7 @@ public class APIConnector {
 
     public List<String> getAttributes(List<String> tagList, String isbn){
         Map<String, String> map = new HashMap<String, String>();
-        final List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<String>();
         try{
             URL url = new URL(baseUrl + isbn);
             URLConnection connection = url.openConnection();
